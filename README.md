@@ -8,7 +8,7 @@ If you have a history of epilepsy, light sensitivity, or motion sickness, please
 
 [Preview the project on Vercel](https://nebula-cruise.vercel.app)
 
-![Nebula Cruise]()
+![Nebula Cruise](./images/nebula-cruise-screenshot.jpg)
 
 ## 🌌 Project Overview
 
