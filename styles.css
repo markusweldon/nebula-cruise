@@ -25,17 +25,17 @@ body:before {
 .scene {
   display: inline-block;
   vertical-align: middle;
-  perspective: 5px;
+  perspective: 10px;
   perspective-origin: 50% 50%;
   position: relative;
 }
 
 .wrap {
   position: absolute;
-  width: 100vw;
-  height: 100vh;
-  left: -50vw;
-  top: -50vh;
+  width: 1000px;
+  height: 1000px;
+  left: -500px;
+  top: -500px;
   transform-style: preserve-3d;
   animation: move 30s infinite linear;
   animation-fill-mode: forwards;
