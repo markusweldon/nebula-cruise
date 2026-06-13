@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const overlay = document.getElementById("overlay");
   const engageButton = document.getElementById("engage");
   const fullscreenButton = document.getElementById("fullscreenToggle");
+  const soundToggle = document.getElementById("soundToggle");
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let gentleDrift = reducedMotion; // hold the 120s CSS default until the user asks for speed
@@ -18,6 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.documentElement.style.setProperty("--duration", 31 - speed + "s");
     }
     Starfield.setSpeed(gentleDrift ? 0.2 : speed);
+    EngineAudio.setSpeed(gentleDrift ? 1 : speed);
   }
 
   function userSetSpeed(value) {
@@ -34,12 +36,35 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.key === "ArrowUp" || e.key === "ArrowRight") userSetSpeed(speed + 1);
     else if (e.key === "ArrowDown" || e.key === "ArrowLeft") userSetSpeed(speed - 1);
     else if (e.key === "f" || e.key === "F") toggleFullscreen();
+    else if (e.key === "m" || e.key === "M") setSound(!soundOn);
+  });
+
+  // Sound: muted by default; a stored "on" preference only arms it —
+  // it switches on at the engage click (a real user gesture)
+  let soundOn = false;
+  const soundArmed = localStorage.getItem("nebula.sound") === "on";
+  if (soundArmed) {
+    soundToggle.textContent = "🔊";
+    soundToggle.setAttribute("aria-pressed", "true");
+  }
+
+  function setSound(on) {
+    soundOn = on;
+    soundToggle.textContent = on ? "🔊" : "🔇";
+    soundToggle.setAttribute("aria-pressed", String(on));
+    localStorage.setItem("nebula.sound", on ? "on" : "off");
+    EngineAudio.setMuted(!on);
+  }
+
+  soundToggle.addEventListener("click", function () {
+    setSound(!soundOn);
   });
 
   engageButton.addEventListener("click", function () {
     document.body.classList.add("engaged");
     overlay.hidden = true;
     Starfield.start();
+    if (soundArmed && !soundOn) setSound(true);
   });
   if (reducedMotion) {
     document.getElementById("reducedMotionNote").hidden = false;
@@ -58,8 +83,13 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("visibilitychange", function () {
     document.body.classList.toggle("paused", document.hidden);
     if (!document.body.classList.contains("engaged")) return;
-    if (document.hidden) Starfield.stop();
-    else Starfield.start();
+    if (document.hidden) {
+      Starfield.stop();
+      EngineAudio.suspend();
+    } else {
+      Starfield.start();
+      EngineAudio.resume();
+    }
   });
 
   setSpeed(parseFloat(speedRange.value));
