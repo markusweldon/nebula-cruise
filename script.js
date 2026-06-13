@@ -92,5 +92,87 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // ── Themes ──────────────────────────────────────────────────────────────
+  const THEMES = {
+    classic: { texture: "url(./images/galaxy-1.jpg)", accent: "#d100d1", track: "#7d3c98" },
+    crimson: { hue: 335, accent: "#ff3366", track: "#8b0000" },
+    emerald: { hue: 150, accent: "#22dd88", track: "#0b6640" },
+    violet:  { hue: 265, accent: "#8855ff", track: "#3b1a8a" },
+  };
+  const textureCache = {};
+
+  // Tiny seeded PRNG (mulberry32) — same theme always looks the same
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function makeNebulaTexture(seed, hue) {
+    const size = 1024;
+    const oc = document.createElement("canvas");
+    oc.width = oc.height = size;
+    const ox = oc.getContext("2d");
+    const rnd = mulberry32(seed);
+    ox.fillStyle = "#000";
+    ox.fillRect(0, 0, size, size);
+    // Layered nebula clouds
+    for (let i = 0; i < 28; i++) {
+      const rx = rnd() * size, ry = rnd() * size;
+      const r = 60 + rnd() * 340;
+      const h = hue + (rnd() - 0.5) * 70;
+      const l = 45 + rnd() * 15;
+      const a = 0.04 + rnd() * 0.10;
+      const g = ox.createRadialGradient(rx, ry, 0, rx, ry, r);
+      g.addColorStop(0, "hsla(" + h + ",75%," + l + "%," + a + ")");
+      g.addColorStop(1, "transparent");
+      ox.fillStyle = g;
+      ox.fillRect(0, 0, size, size);
+    }
+    // Stars
+    for (let i = 0; i < 700; i++) {
+      const sx = rnd() * size, sy = rnd() * size;
+      const sr = rnd() < 0.04 ? 1.5 : 0.7;
+      const bright = rnd() < 0.04;
+      ox.save();
+      if (bright) { ox.shadowBlur = 6; ox.shadowColor = "white"; }
+      ox.fillStyle = "rgba(255,255,255," + (0.5 + rnd() * 0.5) + ")";
+      ox.beginPath();
+      ox.arc(sx, sy, sr, 0, Math.PI * 2);
+      ox.fill();
+      ox.restore();
+    }
+    return oc.toDataURL("image/jpeg", 0.85);
+  }
+
+  function applyTheme(id) {
+    const theme = THEMES[id];
+    if (!theme) return;
+    let tex = theme.texture;
+    if (!tex) {
+      if (!textureCache[id]) textureCache[id] = "url(" + makeNebulaTexture(id.charCodeAt(0) * 31, theme.hue) + ")";
+      tex = textureCache[id];
+    }
+    const root = document.documentElement;
+    root.style.setProperty("--wall-texture", tex);
+    root.style.setProperty("--accent", theme.accent);
+    root.style.setProperty("--track", theme.track);
+    Starfield.setTint(theme.accent);
+    localStorage.setItem("nebula.theme", id);
+  }
+
+  const themeSelect = document.getElementById("theme");
+  themeSelect.addEventListener("change", function () { applyTheme(this.value); });
+
+  // Restore saved theme (textures are generated lazily so it's instant)
+  const savedTheme = localStorage.getItem("nebula.theme");
+  if (savedTheme && THEMES[savedTheme]) {
+    themeSelect.value = savedTheme;
+    applyTheme(savedTheme);
+  }
+
   setSpeed(parseFloat(speedRange.value));
 });
