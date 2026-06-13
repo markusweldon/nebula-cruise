@@ -29,6 +29,10 @@ _Nebula Cruise_ is an interactive animation that simulates the experience of a h
 - 🎶 Background space music option for immersive experience
 - 🌌 More galaxy backgrounds for additional animated voyages
 
+## 🙌 Credits
+
+- 🌌 Galaxy wall texture ("Blue and purple space galaxy") by **sololos**
+
 ## 📜 License
 
 This project is open source and available under the [MIT License](LICENSE).

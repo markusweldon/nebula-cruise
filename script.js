@@ -1,15 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
   const speedRange = document.getElementById("speedRange");
-  const wraps = document.querySelectorAll(".wrap");
+  const speedLabel = document.querySelector('label[for="speedRange"]');
+
+  function setSpeed(speed) {
+    speed = Math.min(30, Math.max(1, speed));
+    speedRange.value = speed;
+    document.documentElement.style.setProperty("--duration", 31 - speed + "s");
+    speedLabel.textContent = "Hyperspace Speed — Warp " + speed.toFixed(1);
+    speedRange.setAttribute("aria-valuetext", "warp " + speed.toFixed(1));
+  }
 
   speedRange.addEventListener("input", function () {
-    const invertedValue = 31 - this.value; // Inverted the range value for speed slider
-    const duration = invertedValue + "s";
-    wraps.forEach((wrap) => {
-      wrap.style.animationDuration = duration;
-      wrap.querySelectorAll(".wall").forEach((wall) => {
-        wall.style.animationDuration = duration;
-      });
-    });
+    setSpeed(parseFloat(this.value));
   });
+
+  setSpeed(parseFloat(speedRange.value));
 });
