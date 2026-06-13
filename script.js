@@ -15,11 +15,26 @@ document.addEventListener("DOMContentLoaded", function () {
     speedRange.value = speed;
     speedLabel.textContent = "Hyperspace Speed — Warp " + speed.toFixed(1);
     speedRange.setAttribute("aria-valuetext", "warp " + speed.toFixed(1));
-    if (!gentleDrift) {
-      document.documentElement.style.setProperty("--duration", 31 - speed + "s");
-    }
+    setTunnelRate();
     Starfield.setSpeed(gentleDrift ? 0.2 : speed);
     EngineAudio.setSpeed(gentleDrift ? 1 : speed);
+  }
+
+  // Drive speed via the Web Animations API playbackRate instead of swapping
+  // animation-duration — the latter re-maps elapsed time and snaps the tunnel.
+  // The CSS --duration stays put as each animation's base; we just scale rate,
+  // so the half-cycle cross-fade offset (a delay ratio) is preserved too.
+  function setTunnelRate() {
+    document.querySelectorAll(".wrap, .wall").forEach(function (el) {
+      el.getAnimations().forEach(function (a) {
+        if (gentleDrift) {
+          a.updatePlaybackRate(1);
+        } else {
+          const baseMs = a.effect.getTiming().duration; // resolved ms
+          a.updatePlaybackRate(baseMs / ((31 - speed) * 1000));
+        }
+      });
+    });
   }
 
   function userSetSpeed(value) {
