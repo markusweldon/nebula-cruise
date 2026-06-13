@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!gentleDrift) {
       document.documentElement.style.setProperty("--duration", 31 - speed + "s");
     }
+    Starfield.setSpeed(gentleDrift ? 0.2 : speed);
   }
 
   function userSetSpeed(value) {
@@ -38,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
   engageButton.addEventListener("click", function () {
     document.body.classList.add("engaged");
     overlay.hidden = true;
+    Starfield.start();
   });
   if (reducedMotion) {
     document.getElementById("reducedMotionNote").hidden = false;
@@ -55,6 +57,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.addEventListener("visibilitychange", function () {
     document.body.classList.toggle("paused", document.hidden);
+    if (!document.body.classList.contains("engaged")) return;
+    if (document.hidden) Starfield.stop();
+    else Starfield.start();
   });
 
   setSpeed(parseFloat(speedRange.value));

@@ -101,6 +101,14 @@ body:before {
   }
 }
 
+#stars {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
 /* Hold the hyperdrive until engaged, and while the tab is hidden */
 body:not(.engaged) .wrap,
 body:not(.engaged) .wall,
