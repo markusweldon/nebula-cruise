@@ -16,18 +16,34 @@ _Nebula Cruise_ is an interactive animation that simulates the experience of a h
 
 ## 🚀 Features
 
-- 🌌 Stunning 3D Hyperspace animation
-- 🎛️ Interactive speed control dial
+- 🌌 Stunning 3D CSS hyperspace tunnel
+- ✨ Canvas warp-streak starfield — dots at warp 1, full light-lines at warp 30
+- 🔊 Procedural engine hum via Web Audio — pitch and texture follow your speed
+- 🎨 Four galaxy themes: Classic Galaxy, Crimson Rift, Emerald Drift, Event Horizon
+- 🎛️ Interactive speed control (slider, keyboard arrows, or just vibe at the default)
+- 📱 Mobile-friendly, fullscreen, and reduced-motion aware
 
 ## 🔧 How to Use
 
-1. 🕹️ Use the speed control dial at the bottom of the screen to adjust the hyperspace speed.
-2. 🌌 Enjoy the journey!
+1. 🕹️ Press **ENGAGE HYPERDRIVE** to depart.
+2. 🎛️ Drag the speed slider (or tap ↑ / ↓ on a keyboard) to adjust warp speed.
+3. 🎨 Switch themes with the galaxy picker.
+4. 🔊 Hit **🔇** (or press **M**) to toggle the engine hum.
+5. ⛶ Press **F** or the fullscreen button for maximum immersion.
+6. 🌌 Enjoy the journey!
+
+## ⌨️ Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| ↑ / → | Speed up |
+| ↓ / ← | Slow down |
+| M | Toggle sound |
+| F | Toggle fullscreen |
 
 ## 📈 Future Enhancements
 
-- 🎶 Background space music option for immersive experience
-- 🌌 More galaxy backgrounds for additional animated voyages
+- 🛸 Multiplayer convoy mode
 
 ## 🙌 Credits
 
@@ -36,6 +52,3 @@ _Nebula Cruise_ is an interactive animation that simulates the experience of a h
 ## 📜 License
 
 This project is open source and available under the [MIT License](LICENSE).
-
-
-
