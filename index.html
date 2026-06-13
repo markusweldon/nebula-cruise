@@ -44,9 +44,10 @@
         Reduced-motion detected — starting at a gentle drift.
       </p>
       <button id="engage">ENGAGE HYPERDRIVE</button>
-      <p class="overlay-keys">↑ ↓ speed · F fullscreen</p>
+      <p class="overlay-keys">↑ ↓ speed · M sound · F fullscreen</p>
     </div>
     <div class="controls">
+      <button id="soundToggle" aria-label="Toggle sound" aria-pressed="false">🔇</button>
       <div class="speed-control">
         <label for="speedRange">Hyperspace Speed</label>
         <input
@@ -60,6 +61,7 @@
       <button id="fullscreenToggle" aria-label="Toggle fullscreen">⛶</button>
     </div>
     <script src="starfield.js"></script>
+    <script src="audio.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
