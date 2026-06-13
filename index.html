@@ -33,15 +33,30 @@
         <div class="wall wall-back"></div>
       </div>
     </div>
-    <div class="speed-control">
-      <input
-        type="range"
-        id="speedRange"
-        min="1"
-        max="30"
-        value="1"
-        step="0.1" />
-      <label for="speedRange">Hyperspace Speed</label>
+    <div class="overlay" id="overlay">
+      <h1>🚀 Nebula Cruise</h1>
+      <p class="overlay-warning">
+        ⚠️ Fast-moving, flashing visuals ahead. If you have photosensitive
+        epilepsy or get motion sick, please be careful out there.
+      </p>
+      <p class="overlay-note" id="reducedMotionNote" hidden>
+        Reduced-motion detected — starting at a gentle drift.
+      </p>
+      <button id="engage">ENGAGE HYPERDRIVE</button>
+      <p class="overlay-keys">↑ ↓ speed · F fullscreen</p>
+    </div>
+    <div class="controls">
+      <div class="speed-control">
+        <label for="speedRange">Hyperspace Speed</label>
+        <input
+          type="range"
+          id="speedRange"
+          min="1"
+          max="30"
+          value="1"
+          step="0.1" />
+      </div>
+      <button id="fullscreenToggle" aria-label="Toggle fullscreen">⛶</button>
     </div>
     <script src="script.js"></script>
   </body>
