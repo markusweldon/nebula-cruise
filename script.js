@@ -10,6 +10,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let gentleDrift = reducedMotion; // hold the 120s CSS default until the user asks for speed
   let speed = 1;
 
+  // Hyperspace jump: whoosh once when you push up past lightspeed, re-arm on slow-down
+  const JUMP_SPEED = 25;
+  const JUMP_REARM = 20;
+  let jumpArmed = true;
+
   function setSpeed(value) {
     speed = Math.min(30, Math.max(1, value));
     speedRange.value = speed;
@@ -18,6 +23,11 @@ document.addEventListener("DOMContentLoaded", function () {
     setTunnelRate();
     Starfield.setSpeed(gentleDrift ? 0.2 : speed);
     EngineAudio.setSpeed(gentleDrift ? 1 : speed);
+
+    if (soundOn && document.body.classList.contains("engaged")) {
+      if (jumpArmed && speed >= JUMP_SPEED) { EngineAudio.jump(); jumpArmed = false; }
+      else if (!jumpArmed && speed < JUMP_REARM) { jumpArmed = true; }
+    }
   }
 
   // Drive speed via the Web Animations API playbackRate instead of swapping
@@ -80,7 +90,6 @@ document.addEventListener("DOMContentLoaded", function () {
     overlay.hidden = true;
     Starfield.start();
     if (soundArmed && !soundOn) setSound(true);
-    if (soundOn) EngineAudio.jump(); // punch into hyperspace
   });
   if (reducedMotion) {
     document.getElementById("reducedMotionNote").hidden = false;
