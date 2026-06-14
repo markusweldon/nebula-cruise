@@ -49,52 +49,72 @@ function rampColor(palette, t) {
   return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
 }
 
+// ridged fractal — sharp filament-like structures (nebula tendrils)
+function ridged(hash, x, y, octaves) {
+  let sum = 0, amp = 0.5, freq = 1, norm = 0;
+  for (let o = 0; o < octaves; o++) {
+    let v = valueNoise(hash, x * freq, y * freq);
+    v = 1 - Math.abs(2 * v - 1);
+    sum += amp * v * v;
+    norm += amp;
+    amp *= 0.5; freq *= 2;
+  }
+  return sum / norm;
+}
+
 function renderNebula(seed, palette) {
   const buf = new Float64Array(SIZE * SIZE * 3);
-  const cloud = makeHash(seed);
-  const mask = makeHash(seed + 101);
-  const tint = makeHash(seed + 202);
-  const dust = makeHash(seed + 303);
-  const scale = 3.2 / SIZE;
+  const hA = makeHash(seed);        // warp field 1
+  const hB = makeHash(seed + 131);  // warp field 2
+  const hC = makeHash(seed + 263);  // density / filaments
+  const hM = makeHash(seed + 397);  // big-scale mask
+  const hD = makeHash(seed + 521);  // dust
+  const hot = palette[palette.length - 1];
+  const scale = 2.7 / SIZE;
 
-  // glow cores — kept small so they're bright knots, not a frame-filling haze
-  const cores = [];
-  const crnd = makeHash(seed + 404);
-  const nCores = 2 + Math.floor(crnd(7, 7) * 2);
-  for (let i = 0; i < nCores; i++) {
-    cores.push({
-      x: crnd(i, 1) * SIZE, y: crnd(i, 2) * SIZE,
-      r: SIZE * (0.04 + crnd(i, 3) * 0.07),
-      b: 0.45 + crnd(i, 4) * 0.5,
-    });
-  }
+  // a central nebula body so every seed frames a main mass
+  const fr = makeHash(seed + 777);
+  const fcx = (0.32 + fr(1, 2) * 0.36) * SIZE;
+  const fcy = (0.32 + fr(3, 4) * 0.36) * SIZE;
+  const frad = SIZE * (0.42 + fr(5, 6) * 0.22);
 
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
       const idx = (y * SIZE + x) * 3;
-      // large-scale where-the-nebula-lives mask — hard threshold leaves real voids
-      let m = fractal(mask, x * scale * 0.5, y * scale * 0.5, 3);
-      m = smooth(Math.max(0, (m - 0.5) / 0.4));
-      let d = fractal(cloud, x * scale, y * scale, 5);
-      d = Math.pow(d, 2.6) * m;
+      const nx = x * scale, ny = y * scale;
 
-      // dark dust lanes carve the clouds
-      const dl = fractal(dust, x * scale * 1.7 + 50, y * scale * 1.7 + 50, 4);
-      d *= 0.3 + 0.7 * smooth(Math.max(0, (dl - 0.3) / 0.7));
+      // domain warping: push the sample point through two noise fields so the
+      // clouds swirl into organic filaments instead of round blobs
+      const qx = fractal(hA, nx, ny, 4);
+      const qy = fractal(hA, nx + 5.2, ny + 1.3, 4);
+      const rx = fractal(hB, nx + 4 * qx + 1.7, ny + 4 * qy + 9.2, 4);
+      const ry = fractal(hB, nx + 4 * qx + 8.3, ny + 4 * qy + 2.8, 4);
+      const wx = nx + 4 * rx, wy = ny + 4 * ry;
 
-      // color shifts across the cloud
-      const cv = fractal(tint, x * scale * 0.8, y * scale * 0.8, 2);
-      const col = rampColor(palette, cv * 0.6 + d * 0.4);
+      // central body (framing) unioned with a low-floor large-scale mask: a
+      // guaranteed main mass, but real dark voids toward the edges
+      const fdx = x - fcx, fdy = y - fcy;
+      const frame = Math.exp(-(fdx * fdx + fdy * fdy) / (2 * frad * frad));
+      const mVoid = smooth(Math.max(0, (fractal(hM, nx * 0.5 + 11, ny * 0.5 + 7, 3) - 0.35) / 0.5));
+      const m = Math.max(mVoid, frame * 0.8);
 
-      let r = col[0] * d * 3.0, g = col[1] * d * 3.0, b = col[2] * d * 3.0;
+      let d = Math.pow(Math.max(0, fractal(hC, wx, wy, 5)), 2.4) * m;
 
-      // glow cores add bright bloom in the brightest palette color
-      const hot = palette[palette.length - 1];
-      for (const c of cores) {
-        const dx = x - c.x, dy = y - c.y;
-        const g2 = Math.exp(-(dx * dx + dy * dy) / (2 * c.r * c.r)) * c.b;
-        r += hot[0] * g2; g += hot[1] * g2; b += hot[2] * g2;
-      }
+      // dust lanes carve deep dark channels through the cloud
+      const dl = fractal(hD, nx * 1.5 + 40, ny * 1.5 + 40, 4);
+      d *= 0.12 + 0.88 * smooth(Math.max(0, (dl - 0.35) / 0.65));
+
+      // bright filaments riding the warped field
+      const fil = ridged(hC, wx, wy, 4);
+      const I = d * 1.7 + fil * fil * d * 3.6;
+
+      // color drifts with the warp + density
+      const col = rampColor(palette, 0.3 + ry * 0.5 + d * 0.5);
+      let r = col[0] * I, g = col[1] * I, b = col[2] * I;
+
+      // hot bloom only in the densest knots
+      const glow = Math.max(0, I - 1.3) * 0.6;
+      r += hot[0] * glow; g += hot[1] * glow; b += hot[2] * glow;
 
       buf[idx] = r; buf[idx + 1] = g; buf[idx + 2] = b;
     }
@@ -172,14 +192,14 @@ function encodePNG(rgb) {
 // ── themes ────────────────────────────────────────────────────────────────
 const P = (a) => a.map((c) => c.map((v) => v / 255));
 const THEMES = {
-  crimson: P([[120, 10, 30], [200, 30, 80], [255, 90, 150]]),
-  emerald: P([[10, 70, 55], [30, 160, 110], [130, 235, 175]]),
-  violet:  P([[40, 20, 90], [95, 50, 185], [165, 125, 255]]),
-  ember:   P([[100, 35, 10], [205, 95, 25], [255, 175, 70]]),
-  ice:     P([[20, 60, 110], [45, 145, 205], [160, 225, 255]]),
-  rose:    P([[110, 25, 85], [215, 65, 155], [255, 150, 215]]),
-  gold:    P([[105, 75, 10], [205, 155, 35], [255, 225, 100]]),
-  abyss:   P([[10, 30, 90], [25, 85, 165], [90, 155, 235]]),
+  crimson: P([[60, 5, 18], [190, 30, 80], [255, 95, 150]]),
+  emerald: P([[5, 40, 30], [28, 150, 105], [140, 240, 180]]),
+  violet:  P([[22, 10, 55], [95, 50, 185], [170, 130, 255]]),
+  ember:   P([[55, 18, 5], [200, 85, 22], [255, 180, 80]]),
+  ice:     P([[8, 32, 65], [45, 140, 205], [175, 230, 255]]),
+  rose:    P([[60, 12, 48], [210, 60, 150], [255, 155, 215]]),
+  gold:    P([[48, 32, 4], [180, 130, 30], [255, 220, 110]]),
+  abyss:   P([[5, 16, 55], [25, 85, 165], [100, 165, 240]]),
 };
 
 let seed = 1337;
