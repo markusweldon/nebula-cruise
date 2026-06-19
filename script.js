@@ -169,7 +169,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   document.getElementById("addGalaxyBtn").addEventListener("click", function () {
     gxErr.hidden = true; gxUrl.value = ""; gxFile.value = "";
-    addPanel.hidden = false; gxUrl.focus();
+    addPanel.hidden = false;
+    if (!gxResults.childElementCount) nasaSearch("nebula");
+    gxSearch.focus();
   });
   document.getElementById("gxCancel").addEventListener("click", function () { addPanel.hidden = true; });
 
@@ -210,6 +212,73 @@ document.addEventListener("DOMContentLoaded", function () {
     img.onload = function () { addCustomGalaxy(url, "My Galaxy"); };
     img.onerror = function () { showErr("That image wouldn't load — check the URL points straight at an image."); };
     img.src = url;
+  });
+
+  // ── NASA "Discover" gallery — runs in the visitor's browser; public-domain ──
+  const gxSearch = document.getElementById("gxSearch");
+  const gxResults = document.getElementById("gxResults");
+  const gxStatus = function (msg) { gxResults.innerHTML = '<p class="gx-status">' + msg + "</p>"; };
+
+  function nasaSearch(q) {
+    if (!q) return;
+    gxSearch.value = q;
+    gxStatus("Searching NASA…");
+    fetch("https://images-api.nasa.gov/search?media_type=image&q=" + encodeURIComponent(q))
+      .then(function (r) { if (!r.ok) throw new Error("http"); return r.json(); })
+      .then(function (data) { renderResults((data.collection && data.collection.items) || []); })
+      .catch(function () { gxStatus("Couldn't reach NASA right now — you can still add by URL or file below."); });
+  }
+
+  function renderResults(items) {
+    gxResults.innerHTML = "";
+    let shown = 0;
+    items.forEach(function (it) {
+      if (shown >= 24) return;
+      const link = it.links && it.links[0] && it.links[0].href;
+      const meta = it.data && it.data[0];
+      if (!link || !meta) return;
+      const btn = document.createElement("button");
+      btn.className = "gx-thumb";
+      btn.title = meta.title || "";
+      const img = document.createElement("img");
+      img.loading = "lazy";
+      img.alt = meta.title || "galaxy";
+      img.src = link;
+      btn.appendChild(img);
+      btn.addEventListener("click", function () { pickNasa(meta.nasa_id, link, meta.title); });
+      gxResults.appendChild(btn);
+      shown++;
+    });
+    if (!shown) gxStatus("No images found — try another search.");
+  }
+
+  function pickNasa(id, thumb, title) {
+    // fetch the asset manifest for the best resolution, fall back to the thumbnail
+    fetch("https://images-api.nasa.gov/asset/" + encodeURIComponent(id))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        const hrefs = ((data && data.collection && data.collection.items) || [])
+          .map(function (i) { return i.href; })
+          .filter(function (h) { return /\.(jpe?g|png)$/i.test(h); });
+        const best = hrefs.filter(function (h) { return /~orig\./i.test(h); })[0]
+          || hrefs.filter(function (h) { return /~large\./i.test(h); })[0]
+          || hrefs[0] || thumb;
+        applyNasa(best, thumb, title);
+      })
+      .catch(function () { applyNasa(thumb, thumb, title); });
+  }
+
+  function applyNasa(url, thumb, title) {
+    const https = function (u) { return safeImageUrl((u || "").replace(/^http:\/\//i, "https://")); };
+    const safe = https(url) || https(thumb);
+    if (!safe) { showErr("That NASA image couldn't be used — try another."); return; }
+    addCustomGalaxy(safe, title || "NASA Galaxy");
+  }
+
+  document.getElementById("gxSearchBtn").addEventListener("click", function () { nasaSearch(gxSearch.value.trim()); });
+  gxSearch.addEventListener("keydown", function (e) { if (e.key === "Enter") nasaSearch(gxSearch.value.trim()); });
+  Array.prototype.forEach.call(document.querySelectorAll(".gx-chip"), function (chip) {
+    chip.addEventListener("click", function () { nasaSearch(chip.getAttribute("data-q")); });
   });
 
   // Restore saved selection

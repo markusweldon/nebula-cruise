@@ -42,9 +42,11 @@ A zero-dependency, static web toy: a CSS 3D "hyperspace tunnel" wrapped in a can
 
 ## 🌠 Bring your own galaxy
 
-Any square-ish image works as a backdrop. There are three ways to add one, from easiest to most permanent:
+Any square-ish image works as a backdrop. There are several ways to add one, from easiest to most permanent:
 
-**1. By URL (no install, instant)** — Click **＋**, paste a direct link to an image (`https://…/something.jpg`), and hit *Add galaxy*. It loads on the spot and is remembered in your browser.
+**0. Discover from NASA (no install, instant)** — Click **＋** and the panel searches NASA's public-domain image library right in your browser. Browse the thumbnail grid (try the Nebula / Galaxy / Hubble / Webb chips) and click one to set it as your backdrop. No API key, nothing uploaded — your browser talks to NASA directly.
+
+**1. By URL (no install, instant)** — Click **＋**, paste a direct link to an image (`https://…/something.jpg`), and hit *Add by URL / file*. It loads on the spot and is remembered in your browser.
 
 **2. From your device (no install, instant)** — Click **＋**, *Choose a file*, pick an image. Same deal — instant, and saved locally to your browser.
 
