@@ -233,15 +233,33 @@ document.addEventListener("DOMContentLoaded", function () {
   // ── NASA "Discover" gallery — runs in the visitor's browser; public-domain ──
   const gxSearch = document.getElementById("gxSearch");
   const gxResults = document.getElementById("gxResults");
+  const gxPager = document.getElementById("gxPager");
+  const gxPrev = document.getElementById("gxPrev");
+  const gxNext = document.getElementById("gxNext");
+  const gxPageNum = document.getElementById("gxPageNum");
+  const gxScroller = addPanel.querySelector(".addgx-card");
   const gxStatus = function (msg) { gxResults.innerHTML = '<p class="gx-status">' + msg + "</p>"; };
 
-  function nasaSearch(q) {
+  // One NASA "page" == one grid of thumbnails. PAGE_SIZE also caps how many
+  // images decode at once, which is what protects a phone's memory budget.
+  const PAGE_SIZE = 12;
+  let nasaQuery = "", nasaPage = 1, nasaTotalHits = 0;
+
+  function nasaSearch(q, page) {
     if (!q) return;
+    nasaQuery = q;
+    nasaPage = page || 1;
     gxSearch.value = q;
+    gxPager.hidden = true;
     gxStatus("Searching NASA…");
-    fetch("https://images-api.nasa.gov/search?media_type=image&q=" + encodeURIComponent(q))
+    fetch("https://images-api.nasa.gov/search?media_type=image&page_size=" + PAGE_SIZE +
+          "&page=" + nasaPage + "&q=" + encodeURIComponent(q))
       .then(function (r) { if (!r.ok) throw new Error("http"); return r.json(); })
-      .then(function (data) { renderResults((data.collection && data.collection.items) || []); })
+      .then(function (data) {
+        const coll = data.collection || {};
+        nasaTotalHits = (coll.metadata && coll.metadata.total_hits) || 0;
+        renderResults(coll.items || []);
+      })
       .catch(function () { gxStatus("Couldn't reach NASA right now — you can still add by URL or file below."); });
   }
 
@@ -249,11 +267,11 @@ document.addEventListener("DOMContentLoaded", function () {
     gxResults.innerHTML = "";
     let shown = 0;
     items.forEach(function (it) {
-      if (shown >= 12) return; // cap concurrent thumbnail decodes for mobile memory
       const link = it.links && it.links[0] && it.links[0].href;
       const meta = it.data && it.data[0];
       if (!link || !meta) return;
       const btn = document.createElement("button");
+      btn.type = "button";
       btn.className = "gx-thumb";
       btn.title = meta.title || "";
       const img = document.createElement("img");
@@ -265,8 +283,29 @@ document.addEventListener("DOMContentLoaded", function () {
       gxResults.appendChild(btn);
       shown++;
     });
-    if (!shown) gxStatus("No images found — try another search.");
+    if (!shown && nasaPage === 1) gxStatus("No images found — try another search.");
+    updatePager(shown);
   }
+
+  function updatePager(shown) {
+    const hasPrev = nasaPage > 1;
+    const hasNext = nasaTotalHits ? nasaPage * PAGE_SIZE < nasaTotalHits : shown === PAGE_SIZE;
+    if (!hasPrev && !hasNext) { gxPager.hidden = true; return; }
+    gxPager.hidden = false;
+    gxPrev.disabled = !hasPrev;
+    gxNext.disabled = !hasNext;
+    gxPageNum.textContent = nasaTotalHits
+      ? "Page " + nasaPage + " / " + Math.ceil(nasaTotalHits / PAGE_SIZE)
+      : "Page " + nasaPage;
+  }
+
+  function gotoNasaPage(page) {
+    if (page < 1) return;
+    if (gxScroller) gxScroller.scrollTop = 0; // show the new grid from the top
+    nasaSearch(nasaQuery, page);
+  }
+  gxPrev.addEventListener("click", function () { gotoNasaPage(nasaPage - 1); });
+  gxNext.addEventListener("click", function () { gotoNasaPage(nasaPage + 1); });
 
   function pickNasa(id, thumb, title) {
     // fetch the asset manifest and pick a *moderate* size — never ~orig, which

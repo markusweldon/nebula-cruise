@@ -77,6 +77,11 @@
           <button type="button"class="gx-chip" data-q="supernova remnant">Supernova</button>
         </div>
         <div class="gx-results" id="gxResults" aria-live="polite"></div>
+        <div class="gx-pager" id="gxPager" hidden>
+          <button type="button" id="gxPrev" aria-label="Previous results">‹ Prev</button>
+          <span id="gxPageNum" aria-live="polite">Page 1</span>
+          <button type="button" id="gxNext" aria-label="More results">Next ›</button>
+        </div>
         <div class="addgx-or">— or paste a link / pick a file —</div>
         <label>Image URL
           <input type="url" id="gxUrl" placeholder="https://…/nebula.jpg" />

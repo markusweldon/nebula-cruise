@@ -335,12 +335,22 @@ body.paused .wall {
   display: none;
 }
 
-/* While the galaxy picker is open, drop the heavy 3D scene + starfield canvas
-   entirely. They keep their rasterized GPU layers resident even when paused,
-   and decoding the NASA gallery on top of them is what pushes a phone's
-   renderer past its memory budget — which mobile browsers recover from by
-   reloading the tab (the "opens picker → crashes → refreshes" report). */
-body.picking .scene,
+/* While the galaxy picker is open, free the large wall textures and pause the
+   tunnel so the NASA gallery doesn't decode on top of a fully-rendered scene
+   and push a phone's renderer past its memory budget (which mobile browsers
+   recover from by reloading the tab — the "opens picker → crashes → refreshes"
+   report). Pausing rather than display:none keeps each animation's state and
+   playbackRate intact, so closing the picker resumes smoothly instead of
+   snapping the tunnel back to base speed. */
+body.picking .wrap,
+body.picking .wall {
+  animation-play-state: paused;
+}
+
+body.picking .wall {
+  background-image: none;
+}
+
 body.picking #stars {
   display: none;
 }
@@ -504,4 +514,38 @@ body.picking #stars {
   font-size: 0.7rem;
   text-align: center;
   padding: 16px;
+}
+
+.gx-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 0.7rem;
+  color: #ccc;
+  letter-spacing: 1px;
+}
+
+.gx-pager[hidden] {
+  display: none;
+}
+
+.gx-pager button {
+  font-family: "Orbitron", sans-serif;
+  cursor: pointer;
+  color: #fff;
+  border: 1px solid var(--track);
+  background: transparent;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.gx-pager button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.gx-pager button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
