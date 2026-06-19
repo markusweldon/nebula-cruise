@@ -43,11 +43,11 @@
       <p class="overlay-note" id="reducedMotionNote" hidden>
         Reduced-motion detected — starting at a gentle drift.
       </p>
-      <button id="engage">ENGAGE HYPERDRIVE</button>
+      <button type="button"id="engage">ENGAGE HYPERDRIVE</button>
       <p class="overlay-keys">↑ ↓ speed · M sound · F fullscreen</p>
     </div>
     <div class="controls">
-      <button id="soundToggle" aria-label="Toggle sound" aria-pressed="false">🔇</button>
+      <button type="button"id="soundToggle" aria-label="Toggle sound" aria-pressed="false">🔇</button>
       <div class="speed-control">
         <label for="speedRange">Hyperspace Speed</label>
         <input
@@ -59,22 +59,22 @@
           step="0.1" />
       </div>
       <select id="theme" aria-label="Galaxy theme"></select>
-      <button id="addGalaxyBtn" aria-label="Add your own galaxy" title="Add your own galaxy">＋</button>
-      <button id="fullscreenToggle" aria-label="Toggle fullscreen">⛶</button>
+      <button type="button"id="addGalaxyBtn" aria-label="Add your own galaxy" title="Add your own galaxy">＋</button>
+      <button type="button"id="fullscreenToggle" aria-label="Toggle fullscreen">⛶</button>
     </div>
     <div class="addgx" id="addGalaxy" hidden>
       <div class="addgx-card addgx-card--wide">
         <h2>Add a galaxy</h2>
         <div class="gx-search">
           <input type="search" id="gxSearch" placeholder="Search NASA — nebula, galaxy, Hubble…" />
-          <button id="gxSearchBtn">Search</button>
+          <button type="button"id="gxSearchBtn">Search</button>
         </div>
         <div class="gx-chips">
-          <button class="gx-chip" data-q="nebula">Nebula</button>
-          <button class="gx-chip" data-q="galaxy">Galaxy</button>
-          <button class="gx-chip" data-q="hubble deep field">Hubble</button>
-          <button class="gx-chip" data-q="webb nebula">Webb</button>
-          <button class="gx-chip" data-q="supernova remnant">Supernova</button>
+          <button type="button"class="gx-chip" data-q="nebula">Nebula</button>
+          <button type="button"class="gx-chip" data-q="galaxy">Galaxy</button>
+          <button type="button"class="gx-chip" data-q="hubble deep field">Hubble</button>
+          <button type="button"class="gx-chip" data-q="webb nebula">Webb</button>
+          <button type="button"class="gx-chip" data-q="supernova remnant">Supernova</button>
         </div>
         <div class="gx-results" id="gxResults" aria-live="polite"></div>
         <div class="addgx-or">— or paste a link / pick a file —</div>
@@ -86,8 +86,8 @@
         </label>
         <p class="addgx-err" id="gxErr" hidden></p>
         <div class="addgx-actions">
-          <button id="gxCancel">Close</button>
-          <button id="gxApply">Add by URL / file</button>
+          <button type="button"id="gxCancel">Close</button>
+          <button type="button"id="gxApply">Add by URL / file</button>
         </div>
       </div>
     </div>

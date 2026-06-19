@@ -253,16 +253,18 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function pickNasa(id, thumb, title) {
-    // fetch the asset manifest for the best resolution, fall back to the thumbnail
+    // fetch the asset manifest and pick a *moderate* size — never ~orig, which
+    // can be tens of MB and crash a phone when painted across 10 wall layers
     fetch("https://images-api.nasa.gov/asset/" + encodeURIComponent(id))
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         const hrefs = ((data && data.collection && data.collection.items) || [])
           .map(function (i) { return i.href; })
           .filter(function (h) { return /\.(jpe?g|png)$/i.test(h); });
-        const best = hrefs.filter(function (h) { return /~orig\./i.test(h); })[0]
-          || hrefs.filter(function (h) { return /~large\./i.test(h); })[0]
-          || hrefs[0] || thumb;
+        const bySize = function (tag) {
+          return hrefs.filter(function (h) { return new RegExp("~" + tag + "\\.", "i").test(h); })[0];
+        };
+        const best = bySize("medium") || bySize("small") || bySize("large") || thumb;
         applyNasa(best, thumb, title);
       })
       .catch(function () { applyNasa(thumb, thumb, title); });
