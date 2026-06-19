@@ -335,6 +335,16 @@ body.paused .wall {
   display: none;
 }
 
+/* While the galaxy picker is open, drop the heavy 3D scene + starfield canvas
+   entirely. They keep their rasterized GPU layers resident even when paused,
+   and decoding the NASA gallery on top of them is what pushes a phone's
+   renderer past its memory budget — which mobile browsers recover from by
+   reloading the tab (the "opens picker → crashes → refreshes" report). */
+body.picking .scene,
+body.picking #stars {
+  display: none;
+}
+
 .addgx-card {
   width: min(90vw, 360px);
   background: linear-gradient(145deg, #1a1a1a, #333);

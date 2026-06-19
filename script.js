@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("visibilitychange", function () {
     document.body.classList.toggle("paused", document.hidden);
     if (!document.body.classList.contains("engaged")) return;
-    if (document.hidden) {
+    if (document.hidden || document.body.classList.contains("picking")) {
       Starfield.stop();
       EngineAudio.suspend();
     } else {
@@ -167,13 +167,29 @@ document.addEventListener("DOMContentLoaded", function () {
   const gxErr = document.getElementById("gxErr");
   const showErr = function (msg) { gxErr.textContent = msg; gxErr.hidden = false; };
 
-  document.getElementById("addGalaxyBtn").addEventListener("click", function () {
+  // Opening the picker frees the 3D scene + starfield (see .picking in CSS) and
+  // halts their loops, so the NASA gallery doesn't decode on top of the full
+  // hyperspace render and crash a memory-constrained phone. Closing restores it.
+  function openPicker() {
     gxErr.hidden = true; gxUrl.value = ""; gxFile.value = "";
+    document.body.classList.add("picking");
+    Starfield.stop();
+    EngineAudio.suspend();
     addPanel.hidden = false;
     if (!gxResults.childElementCount) nasaSearch("nebula");
     gxSearch.focus();
-  });
-  document.getElementById("gxCancel").addEventListener("click", function () { addPanel.hidden = true; });
+  }
+  function closePicker() {
+    addPanel.hidden = true;
+    document.body.classList.remove("picking");
+    if (!document.hidden && document.body.classList.contains("engaged")) {
+      Starfield.start();
+      EngineAudio.resume();
+    }
+  }
+
+  document.getElementById("addGalaxyBtn").addEventListener("click", openPicker);
+  document.getElementById("gxCancel").addEventListener("click", closePicker);
 
   // Only http(s) image URLs, and nothing that could break out of url("…")
   function safeImageUrl(raw) {
@@ -193,7 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
     customGalaxies.push(g);
     try { localStorage.setItem("nebula.galaxies", JSON.stringify(customGalaxies)); }
     catch (e) { /* over quota (big data URL) — keep it for this session only */ }
-    addPanel.hidden = true;
+    closePicker();
   }
 
   document.getElementById("gxApply").addEventListener("click", function () {
@@ -233,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
     gxResults.innerHTML = "";
     let shown = 0;
     items.forEach(function (it) {
-      if (shown >= 24) return;
+      if (shown >= 12) return; // cap concurrent thumbnail decodes for mobile memory
       const link = it.links && it.links[0] && it.links[0].href;
       const meta = it.data && it.data[0];
       if (!link || !meta) return;
