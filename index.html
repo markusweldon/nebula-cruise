@@ -58,19 +58,28 @@
           value="1"
           step="0.1" />
       </div>
-      <select id="theme" aria-label="Galaxy theme">
-        <option value="classic">Classic Galaxy</option>
-        <option value="crimson">Crimson Rift</option>
-        <option value="rose">Rose Nebula</option>
-        <option value="ember">Solar Ember</option>
-        <option value="gold">Goldforge</option>
-        <option value="emerald">Emerald Drift</option>
-        <option value="ice">Ice Veil</option>
-        <option value="abyss">Abyssal Blue</option>
-        <option value="violet">Event Horizon</option>
-      </select>
+      <select id="theme" aria-label="Galaxy theme"></select>
+      <button id="addGalaxyBtn" aria-label="Add your own galaxy" title="Add your own galaxy">＋</button>
       <button id="fullscreenToggle" aria-label="Toggle fullscreen">⛶</button>
     </div>
+    <div class="addgx" id="addGalaxy" hidden>
+      <div class="addgx-card">
+        <h2>Add a galaxy</h2>
+        <label>Image URL
+          <input type="url" id="gxUrl" placeholder="https://…/nebula.jpg" />
+        </label>
+        <div class="addgx-or">— or —</div>
+        <label class="addgx-file">Choose a file from your device
+          <input type="file" id="gxFile" accept="image/*" />
+        </label>
+        <p class="addgx-err" id="gxErr" hidden></p>
+        <div class="addgx-actions">
+          <button id="gxCancel">Cancel</button>
+          <button id="gxApply">Add galaxy</button>
+        </div>
+      </div>
+    </div>
+    <script src="galaxies.js"></script>
     <script src="starfield.js"></script>
     <script src="audio.js"></script>
     <script src="script.js"></script>

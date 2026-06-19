@@ -117,41 +117,104 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // ── Themes ──────────────────────────────────────────────────────────────
-  // Textures are pre-baked image files (see tools/gen-galaxies.js for the
-  // procedural nebulae; classic is the original photo).
-  const THEMES = {
-    classic: { texture: "./images/galaxy-1.jpg",       accent: "#d100d1", track: "#7d3c98" },
-    crimson: { texture: "./images/galaxy-crimson.png", accent: "#ff3366", track: "#8b0000" },
-    emerald: { texture: "./images/galaxy-emerald.png", accent: "#22dd88", track: "#0b6640" },
-    violet:  { texture: "./images/galaxy-violet.png",  accent: "#8855ff", track: "#3b1a8a" },
-    ember:   { texture: "./images/galaxy-ember.png",   accent: "#ff8c1a", track: "#7a3b08" },
-    ice:     { texture: "./images/galaxy-ice.png",     accent: "#33ccff", track: "#16607a" },
-    rose:    { texture: "./images/galaxy-rose.png",    accent: "#ff66cc", track: "#7a2a5e" },
-    gold:    { texture: "./images/galaxy-gold.png",    accent: "#ffcc33", track: "#7a5e10" },
-    abyss:   { texture: "./images/galaxy-abyss.png",   accent: "#2266ff", track: "#13357a" },
-  };
+  // ── Galaxies ──────────────────────────────────────────────────────────────
+  // Built-ins come from galaxies.js (window.GALAXIES). Users can also add their
+  // own at runtime by URL or file; those persist in this browser's localStorage.
+  const DEFAULT_ACCENT = "#d100d1", DEFAULT_TRACK = "#7d3c98";
+  const galaxies = {};   // id -> galaxy
+  const order = [];      // ids in display order
 
-  function applyTheme(id) {
-    const theme = THEMES[id];
-    if (!theme) return;
-    const root = document.documentElement;
-    root.style.setProperty("--wall-texture", "url(" + theme.texture + ")");
-    root.style.setProperty("--accent", theme.accent);
-    root.style.setProperty("--track", theme.track);
-    Starfield.setTint(theme.accent);
-    localStorage.setItem("nebula.theme", id);
+  function registerGalaxy(g) {
+    if (!galaxies[g.id]) order.push(g.id);
+    galaxies[g.id] = g;
   }
+  (window.GALAXIES || []).forEach(registerGalaxy);
+
+  // galaxies the user added on a previous visit
+  let customGalaxies = [];
+  try { customGalaxies = JSON.parse(localStorage.getItem("nebula.galaxies") || "[]"); } catch (e) {}
+  customGalaxies.forEach(registerGalaxy);
 
   const themeSelect = document.getElementById("theme");
+  function rebuildOptions() {
+    themeSelect.innerHTML = "";
+    order.forEach(function (id) {
+      const o = document.createElement("option");
+      o.value = id;
+      o.textContent = galaxies[id].name;
+      themeSelect.appendChild(o);
+    });
+  }
+  rebuildOptions();
+
+  function applyTheme(id) {
+    const g = galaxies[id];
+    if (!g) return;
+    const root = document.documentElement;
+    root.style.setProperty("--wall-texture", 'url("' + g.texture + '")');
+    root.style.setProperty("--accent", g.accent || DEFAULT_ACCENT);
+    root.style.setProperty("--track", g.track || DEFAULT_TRACK);
+    Starfield.setTint(g.accent || DEFAULT_ACCENT);
+    themeSelect.value = id;
+    localStorage.setItem("nebula.theme", id);
+  }
   themeSelect.addEventListener("change", function () { applyTheme(this.value); });
 
-  // Restore saved theme
-  const savedTheme = localStorage.getItem("nebula.theme");
-  if (savedTheme && THEMES[savedTheme]) {
-    themeSelect.value = savedTheme;
-    applyTheme(savedTheme);
+  // ── Add-your-own-galaxy panel (URL or file) ──
+  const addPanel = document.getElementById("addGalaxy");
+  const gxUrl = document.getElementById("gxUrl");
+  const gxFile = document.getElementById("gxFile");
+  const gxErr = document.getElementById("gxErr");
+  const showErr = function (msg) { gxErr.textContent = msg; gxErr.hidden = false; };
+
+  document.getElementById("addGalaxyBtn").addEventListener("click", function () {
+    gxErr.hidden = true; gxUrl.value = ""; gxFile.value = "";
+    addPanel.hidden = false; gxUrl.focus();
+  });
+  document.getElementById("gxCancel").addEventListener("click", function () { addPanel.hidden = true; });
+
+  // Only http(s) image URLs, and nothing that could break out of url("…")
+  function safeImageUrl(raw) {
+    let u;
+    try { u = new URL(raw, location.href); } catch (e) { return null; }
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    if (/["')\\]/.test(u.href)) return null;
+    return u.href;
   }
+
+  function addCustomGalaxy(texture, label) {
+    const g = { id: "custom-" + Date.now(), name: label || "My Galaxy", texture: texture,
+                accent: DEFAULT_ACCENT, track: DEFAULT_TRACK };
+    registerGalaxy(g);
+    rebuildOptions();
+    applyTheme(g.id);
+    customGalaxies.push(g);
+    try { localStorage.setItem("nebula.galaxies", JSON.stringify(customGalaxies)); }
+    catch (e) { /* over quota (big data URL) — keep it for this session only */ }
+    addPanel.hidden = true;
+  }
+
+  document.getElementById("gxApply").addEventListener("click", function () {
+    gxErr.hidden = true;
+    if (gxFile.files && gxFile.files[0]) {
+      const file = gxFile.files[0];
+      const reader = new FileReader();
+      reader.onload = function () { addCustomGalaxy(reader.result, file.name.replace(/\.[^.]+$/, "")); };
+      reader.onerror = function () { showErr("Couldn't read that file."); };
+      reader.readAsDataURL(file);
+      return;
+    }
+    const url = safeImageUrl(gxUrl.value.trim());
+    if (!url) { showErr("Enter a valid http(s) image URL, or choose a file."); return; }
+    const img = new Image();
+    img.onload = function () { addCustomGalaxy(url, "My Galaxy"); };
+    img.onerror = function () { showErr("That image wouldn't load — check the URL points straight at an image."); };
+    img.src = url;
+  });
+
+  // Restore saved selection
+  const savedTheme = localStorage.getItem("nebula.theme");
+  if (savedTheme && galaxies[savedTheme]) applyTheme(savedTheme);
 
   setSpeed(parseFloat(speedRange.value));
 });

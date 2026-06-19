@@ -318,3 +318,93 @@ body.paused .wall {
     height: 28px;
   }
 }
+
+/* Add-your-own-galaxy panel */
+.addgx {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.addgx[hidden] {
+  display: none;
+}
+
+.addgx-card {
+  width: min(90vw, 360px);
+  background: linear-gradient(145deg, #1a1a1a, #333);
+  color: #fff;
+  font-family: "Orbitron", sans-serif;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+}
+
+.addgx-card h2 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  letter-spacing: 2px;
+}
+
+.addgx-card label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+.addgx-card input[type="url"] {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--track);
+  background: #000;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.addgx-or {
+  text-align: center;
+  color: #888;
+  font-size: 0.7rem;
+  margin: 12px 0;
+}
+
+.addgx-file input {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: #ccc;
+}
+
+.addgx-err {
+  color: #ff6b6b;
+  font-size: 0.7rem;
+  margin: 10px 0 0;
+}
+
+.addgx-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.addgx-actions button {
+  font-family: "Orbitron", sans-serif;
+  padding: 9px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--track);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+#gxApply {
+  border: none;
+  background: linear-gradient(145deg, #5a0b8a, var(--accent));
+}

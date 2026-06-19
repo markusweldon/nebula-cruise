@@ -1,38 +1,37 @@
 # 🚀 Nebula Cruise
 
-Dive into the vastness of space with Nebula Cruise. An immersive hyperspace jump journey through the cosmos. Control the pace of your voyage and experience the beauty of interstellar space travel.
+Dive into the vastness of space with Nebula Cruise — an immersive hyperspace-jump journey through the cosmos. Take the captain's seat, throttle up, and watch the galaxy streak past.
 
-## ⚠️ Warning
-
-If you have a history of epilepsy, light sensitivity, or motion sickness, please be cautious before viewing. The animation contains fast-moving visuals that might trigger seizures for people with these conditions. Always ensure you're viewing in a safe environment.
-
-[Preview the project on Vercel](https://nebula-cruise.vercel.app)
+🛰️ **Live demo:** https://nebula-cruise.vercel.app
 
 ![Nebula Cruise](./images/nebula-cruise-screenshot.jpg)
 
-## 🌌 Project Overview
+## ⚠️ Warning
 
-_Nebula Cruise_ is an interactive animation that simulates the experience of a hyperspace jump through interstellar space. With a user-friendly speed control, you're in the captain's seat, navigating the beauty of the universe.
+If you have a history of epilepsy, light sensitivity, or motion sickness, please be cautious. The animation contains fast-moving, flashing visuals. Nebula Cruise starts paused behind a "press to engage" screen and honours your system's reduced-motion setting — but always view in a safe environment.
+
+## 🌌 What it is
+
+A zero-dependency, static web toy: a CSS 3D "hyperspace tunnel" wrapped in a canvas warp-streak starfield, with a synthesized spacecraft engine and swappable galaxy backdrops. No build step, no frameworks — just open `index.html`.
 
 ## 🚀 Features
 
-- 🌌 Stunning 3D CSS hyperspace tunnel
-- ✨ Canvas warp-streak starfield — dots at warp 1, full light-lines at warp 30
-- 🔊 Procedural engine hum via Web Audio — pitch and texture follow your speed
-- 🎨 Four galaxy themes: Classic Galaxy, Crimson Rift, Emerald Drift, Event Horizon
-- 🎛️ Interactive speed control (slider, keyboard arrows, or just vibe at the default)
-- 📱 Mobile-friendly, fullscreen, and reduced-motion aware
+- 🌀 3D CSS hyperspace tunnel with a seamless, speed-scaled loop
+- ✨ Canvas **warp-streak starfield** — gentle dots at low warp, full light-lines at high warp
+- 🔊 **Procedural engine** (Web Audio): a deep roar that scales with speed, plus a **hyperspace jump whoosh** when you punch past lightspeed
+- 🎨 **Galaxy picker** — 9 built-in backdrops, *plus add your own* (see below)
+- 🎛️ Speed via slider, keyboard, or just drift at the default
+- 📱 Mobile-friendly, fullscreen, and `prefers-reduced-motion` aware
+- ⏸️ Pauses itself when the tab is hidden
 
-## 🔧 How to Use
+## 🔧 How to use
 
-1. 🕹️ Press **ENGAGE HYPERDRIVE** to depart.
-2. 🎛️ Drag the speed slider (or tap ↑ / ↓ on a keyboard) to adjust warp speed.
-3. 🎨 Switch themes with the galaxy picker.
-4. 🔊 Hit **🔇** (or press **M**) to toggle the engine hum.
-5. ⛶ Press **F** or the fullscreen button for maximum immersion.
-6. 🌌 Enjoy the journey!
+1. Press **ENGAGE HYPERDRIVE** to launch.
+2. Drag the **speed slider** (or use ↑ / ↓) to set your warp. Cross ~warp 25 to trigger the jump whoosh.
+3. Pick a **galaxy** from the dropdown, or hit **＋** to add your own.
+4. Toggle **🔊** sound and **⛶** fullscreen to taste.
 
-## ⌨️ Keyboard Shortcuts
+### ⌨️ Keyboard shortcuts
 
 | Key | Action |
 |-----|--------|
@@ -41,14 +40,51 @@ _Nebula Cruise_ is an interactive animation that simulates the experience of a h
 | M | Toggle sound |
 | F | Toggle fullscreen |
 
-## 📈 Future Enhancements
+## 🌠 Bring your own galaxy
 
-- 🛸 Multiplayer convoy mode
+Any square-ish image works as a backdrop. There are three ways to add one, from easiest to most permanent:
+
+**1. By URL (no install, instant)** — Click **＋**, paste a direct link to an image (`https://…/something.jpg`), and hit *Add galaxy*. It loads on the spot and is remembered in your browser.
+
+**2. From your device (no install, instant)** — Click **＋**, *Choose a file*, pick an image. Same deal — instant, and saved locally to your browser.
+
+> Galaxies you add by URL or file live only in *your* browser's `localStorage`. They aren't uploaded anywhere and don't change the site for anyone else.
+
+**3. Permanently, for everyone (a quick PR)** — Make it a built-in:
+1. Drop your image into `images/`.
+2. Add one line to [`galaxies.js`](./galaxies.js):
+   ```js
+   { id: "my-galaxy", name: "My Galaxy", texture: "./images/my-galaxy.jpg", accent: "#33ccff", track: "#16607a" },
+   ```
+   `accent` tints the slider and warp streaks; `track` is the slider track colour.
+3. Open a pull request. The dropdown is built from this file, so it shows up automatically.
+
+### 🎨 Generating procedural galaxies
+
+The non-photo built-ins are generated, not sourced. Run the zero-dependency renderer (Node only, no packages) to regenerate or tweak them:
+
+```sh
+node tools/gen-galaxies.js
+```
+
+It paints domain-warped nebula clouds with ridged filaments and a star field, and writes PNGs straight to `images/` using Node's built-in `zlib`. Edit the palette table at the bottom of the script to add your own colourways.
+
+## 🗂️ Project layout
+
+| File | Role |
+|------|------|
+| `index.html` | Markup: scene, controls, overlays |
+| `styles.css` | 3D tunnel, animations, UI |
+| `starfield.js` | Canvas warp-streak layer |
+| `audio.js` | Procedural engine + jump whoosh |
+| `galaxies.js` | Galaxy catalog (edit to add built-ins) |
+| `script.js` | Controller: speed, themes, add-your-own, keyboard |
+| `tools/gen-galaxies.js` | Build-time procedural nebula generator |
 
 ## 🙌 Credits
 
-- 🌌 Galaxy wall texture ("Blue and purple space galaxy") by **sololos**
+- 🌌 Classic galaxy texture ("Blue and purple space galaxy") by **sololos**
 
 ## 📜 License
 
-This project is open source and available under the [MIT License](LICENSE).
+Open source under the [MIT License](LICENSE).
